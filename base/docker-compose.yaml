@@ -1,0 +1,113 @@
+name: "jitsu-party"
+services:
+  kafka:
+    tty: true
+    image: bitnami/kafka:3.9.0
+    hostname: jitsu-kafka
+    networks:
+      - network-jitsu-kafka
+    volumes:
+      - data-jitsu-kafka:/bitnami
+    ports:
+      - "9092:9092" # Client communication
+      - "9093:9093" # Controller communication
+      - "9094:9094" # External communication
+    environment:
+      KAFKA_CFG_NODE_ID: 1
+      KAFKA_CFG_PROCESS_ROLES: broker,controller
+      KAFKA_CFG_LISTENERS: PLAINTEXT://:9092,CONTROLLER://:9093,EXTERNAL://:9094
+      # KAFKA_CFG_ADVERTISED_LISTENERS: PLAINTEXT://localhost:9092,EXTERNAL://localhost:9094 # Somehow this also valid
+      KAFKA_CFG_ADVERTISED_LISTENERS: PLAINTEXT://host.docker.internal:9092,EXTERNAL://host.docker.internal:9094
+      KAFKA_CFG_CONTROLLER_LISTENER_NAMES: CONTROLLER
+      KAFKA_CFG_LISTENER_SECURITY_PROTOCOL_MAP: CONTROLLER:PLAINTEXT,EXTERNAL:PLAINTEXT,PLAINTEXT:PLAINTEXT
+      # KAFKA_CFG_CONTROLLER_QUORUM_VOTERS: 1@localhost:9093 # Somehow this also valid
+      KAFKA_CFG_CONTROLLER_QUORUM_VOTERS: 1@host.docker.internal:9093
+      KAFKA_CFG_AUTO_CREATE_TOPICS_ENABLE: true
+    healthcheck:
+      test: ["CMD-SHELL", "kafka-topics.sh --bootstrap-server 127.0.0.1:9092 --list"]
+      interval: 5s
+      timeout: 10s
+      retries: 30
+    
+  clickhouse:
+    tty: true
+    image: clickhouse/clickhouse-server:24.1
+    hostname: jitsu-clickhouse
+    networks:
+      - network-jitsu-clickhouse
+    volumes:
+      - data-jitsu-clickhouse:/var/lib/clickhouse
+    ports:
+      - "8123:8123"  # Port default HTTP
+      - "9000:9000"  # Port default TCP
+    restart: "unless-stopped"
+    environment:
+      - CLICKHOUSE_DB=newjitsu_metrics
+      - CLICKHOUSE_USER=default
+      - CLICKHOUSE_DEFAULT_ACCESS_MANAGEMENT=1
+      - CLICKHOUSE_PASSWORD=mypswd123
+    logging:
+      options:
+        max-size: 10m
+        max-file: "3"
+  
+  ch-ui:
+    image: ghcr.io/caioricciuti/ch-ui:latest
+    restart: always
+    ports:
+      - "5521:5521"
+
+  mongodb:
+    image: mongo
+    hostname: jitsu-mongodb
+    networks:
+      - network-jitsu-mongodb
+    volumes:
+      - data-jitsu-mongodb:/data/db
+    ports:
+      - "27017:27017"
+    restart: "unless-stopped"
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: default
+      MONGO_INITDB_ROOT_PASSWORD: mypswd123
+
+  postgres:
+    tty: true
+    image: postgres:14
+    hostname: jitsu-postgres
+    networks:
+      - network-jitsu-postgres
+    volumes:
+      - data-jitsu-postgres:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    restart: "unless-stopped"
+    user: postgres
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=mypswd123
+    logging:
+      options:
+        max-size: 10m
+        max-file: "3"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready", "-d", "postgres"]
+      interval: 1s
+      timeout: 10s
+      retries: 10
+
+volumes:
+  data-jitsu-kafka:
+  data-jitsu-mongodb:
+  data-jitsu-postgres:
+  data-jitsu-clickhouse:
+
+networks:
+  network-jitsu-kafka:
+    driver: bridge
+  network-jitsu-mongodb:
+    driver: bridge
+  network-jitsu-postgres:
+    driver: bridge
+  network-jitsu-clickhouse:
+    driver: bridge

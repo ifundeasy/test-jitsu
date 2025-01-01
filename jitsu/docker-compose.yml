@@ -1,0 +1,183 @@
+name: "jitsu-service"
+services:
+  console:
+    tty: true
+    image: jitsucom/console:2.8.5
+    restart: "unless-stopped"
+    platform: linux/amd64
+    environment:
+      ROTOR_URL: "http://rotor:3401"
+      ROTOR_AUTH_KEY: "myBulkerTokenIs123"
+      BULKER_URL: "http://bulker:3042"
+      CONSOLE_RAW_AUTH_TOKENS: "myConsoleTokenIs123"
+      BULKER_AUTH_KEY: "myBulkerTokenIs123"
+      MIT_COMPLIANT: "false"
+      DATABASE_URL: "postgresql://postgres:mypswd123@host.docker.internal:5432/postgres?schema=newjitsu"
+      SEED_USER_EMAIL: "admin@jitsu.com"
+      SEED_USER_PASSWORD: "admin123"
+      ENABLE_CREDENTIALS_LOGIN: "true"
+      GITHUB_CLIENT_ID: ""
+      GITHUB_CLIENT_SECRET: ""
+      SYNCS_ENABLED: "false"
+      SYNCCTL_URL: "http://syncctl:3043"
+      SYNCCTL_AUTH_KEY: "mySyncctlTokenIs123"
+      GOOGLE_SCHEDULER_KEY: ""
+      JITSU_INGEST_PUBLIC_URL: "http://localhost:8080"
+      JITSU_PUBLIC_URL: "http://localhost:3000"
+      NEXTAUTH_URL: "http://localhost:3000"
+      CLICKHOUSE_HOST: "host.docker.internal:8123"
+      CLICKHOUSE_USERNAME: "default"
+      CLICKHOUSE_PASSWORD: "mypswd123"
+      CLICKHOUSE_DATABASE: "newjitsu_metrics"
+      MONGODB_URL: "mongodb://default:mypswd123@host.docker.internal/jitsu"
+      MONGODB_NETWORK_COMPRESSION: "none"
+      FORCE_UPDATE_DB: "true"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://console:3000/api/healthcheck"]
+      interval: 2s
+      timeout: 10s
+      retries: 30
+    extra_hosts:
+      - "syncctl:host-gateway"
+    ports:
+      - "3000:3000"
+
+  sync-catalog-init:
+    tty: true
+    image: curlimages/curl
+    restart: "on-failure"
+    environment:
+      CONSOLE_TOKEN: "myConsoleTokenIs123"
+    command: >
+      curl --silent --output /dev/null --show-error
+      -H 'Authorization: Bearer service-admin-account:myConsoleTokenIs123'
+      'http://console:3000/api/admin/catalog-refresh?initial=true'
+    depends_on:
+      console:
+        condition: service_healthy
+
+  bulker:
+    tty: true
+    image: jitsucom/bulker:2.8.5
+    platform: linux/amd64
+    restart: "unless-stopped"
+    environment:
+      TERM: "xterm-256color"
+      BULKER_KAFKA_BOOTSTRAP_SERVERS: "host.docker.internal:9092"
+      BULKER_RAW_AUTH_TOKENS: "myBulkerTokenIs123"
+      BULKER_CONFIG_SOURCE: "http://console:3000/api/admin/export/bulker-connections"
+      BULKER_CONFIG_SOURCE_HTTP_AUTH_TOKEN: "service-admin-account:myConsoleTokenIs123"
+      BULKER_CACHE_DIR: "/tmp/cache"
+      BULKER_INTERNAL_TASK_LOG: >-
+        {
+          "id": "task_log",
+          "metricsKeyPrefix": "syncs",
+          "usesBulker": true,
+          "type": "postgres",
+          "options": {
+            "mode": "stream"
+          },
+          "credentials": {
+            "host": "host.docker.internal",
+            "port": 5432,
+            "sslMode": "disable",
+            "database": "postgres",
+            "password": "mypswd123",
+            "username": "postgres",
+            "defaultSchema": "newjitsu"
+          }
+        }
+      BULKER_CLICKHOUSE_HOST: "host.docker.internal:9000"
+      BULKER_CLICKHOUSE_USERNAME: "default"
+      BULKER_CLICKHOUSE_PASSWORD: "mypswd123"
+      BULKER_CLICKHOUSE_DATABASE: "newjitsu_metrics"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://bulker:3042/health"]
+      interval: 2s
+      timeout: 10s
+      retries: 15
+    depends_on:
+      console:
+        condition: service_healthy
+
+  rotor:
+    tty: true
+    image: jitsucom/rotor:2.8.5
+    platform: linux/amd64
+    restart: "unless-stopped"
+    environment:
+      ROTOR_RAW_AUTH_TOKENS: "myBulkerTokenIs123"
+      BULKER_URL: "http://bulker:3042"
+      BULKER_AUTH_KEY: "myBulkerTokenIs123"
+      KAFKA_BOOTSTRAP_SERVERS: "host.docker.internal:9092"
+      REPOSITORY_BASE_URL: "http://console:3000/api/admin/export/"
+      REPOSITORY_AUTH_TOKEN: "service-admin-account:myConsoleTokenIs123"
+      REPOSITORY_CACHE_DIR: "/tmp/cache"
+      MONGODB_URL: "mongodb://default:mypswd123@host.docker.internal/jitsu"
+      CLICKHOUSE_HOST: "host.docker.internal:8123"
+      CLICKHOUSE_USERNAME: "default"
+      CLICKHOUSE_PASSWORD: "mypswd123"
+      CLICKHOUSE_DATABASE: "newjitsu_metrics"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://rotor:3401/health"]
+      interval: 5s
+      timeout: 10s
+      retries: 15
+    depends_on:
+      console:
+        condition: service_healthy
+      bulker:
+        condition: service_healthy
+
+  ingest:
+    tty: true
+    image: jitsucom/ingest:2.8.5
+    platform: linux/amd64
+    restart: "unless-stopped"
+    environment:
+      TERM: "xterm-256color"
+      INGEST_PUBLIC_URL: "http://localhost:8080"
+      INGEST_KAFKA_BOOTSTRAP_SERVERS: "host.docker.internal:9092"
+      INGEST_RAW_AUTH_TOKENS: "myBulkerTokenIs123"
+      INGEST_REPOSITORY_URL: "http://console:3000/api/admin/export/streams-with-destinations"
+      INGEST_SCRIPT_ORIGIN: "http://console:3000/api/s/javascript-library"
+      INGEST_REPOSITORY_AUTH_TOKEN: "service-admin-account:myConsoleTokenIs123"
+      INGEST_CACHE_DIR: "/tmp/cache"
+      INGEST_ROTOR_URL: "http://rotor:3401"
+      INGEST_ROTOR_AUTH_KEY: "myBulkerTokenIs123"
+      INGEST_CLICKHOUSE_HOST: "host.docker.internal:9000"
+      INGEST_CLICKHOUSE_USERNAME: "default"
+      INGEST_CLICKHOUSE_PASSWORD: "mypswd123"
+      INGEST_CLICKHOUSE_DATABASE: "newjitsu_metrics"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://ingest:3049/health"]
+      interval: 2s
+      timeout: 10s
+      retries: 15
+    depends_on:
+      console:
+        condition: service_healthy
+      rotor:
+        condition: service_started
+    ports:
+      - "8080:3049"
+
+  syncctl:
+    tty: true
+    image: jitsucom/syncctl:2.8.5
+    platform: linux/amd64
+    restart: "on-failure"
+    environment:
+      TERM: "xterm-256color"
+      HTTP_PORT: "3043"
+      SYNCCTL_SYNCS_ENABLED: "false"
+      SYNCCTL_RAW_AUTH_TOKENS: "mySyncctlTokenIs123"
+      SYNCCTL_DATABASE_URL: "postgresql://postgres:mypswd123@127.0.0.1:5432/postgres?search_path=newjitsu"
+      SYNCCTL_SIDECAR_DATABASE_URL: "postgresql://postgres:mypswd123@host.minikube.internal:5432/postgres?search_path=newjitsu"
+      # SYNCCTL_KUBERNETES_CLIENT_CONFIG: ""
+      SYNCCTL_KUBERNETES_CLIENT_CONFIG: "local"
+      SYNCCTL_KUBERNETES_CONTEXT: ""
+    network_mode: "host"
+    depends_on:
+      bulker:
+        condition: service_healthy
