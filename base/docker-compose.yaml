@@ -53,7 +53,7 @@ services:
   
   ch-ui:
     image: ghcr.io/caioricciuti/ch-ui:latest
-    restart: always
+    restart: "unless-stopped"
     ports:
       - "5521:5521"
 
