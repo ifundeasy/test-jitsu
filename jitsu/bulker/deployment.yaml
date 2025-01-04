@@ -1,36 +1,38 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: syncctl
+  name: bulker
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: syncctl
+      app: bulker
   template:
     metadata:
       labels:
-        app: syncctl
+        app: bulker
     spec:
+      dnsPolicy: ClusterFirst
       containers:
-        - name: syncctl
-          image: jitsucom/syncctl:2.8.5
+        - name: bulker
+          image: jitsucom/bulker:2.8.5
           tty: true
           envFrom:
             - configMapRef:
-                name: syncctl-config
+                name: bulker-config
+          ports:
+            - containerPort: 3042
           livenessProbe:
             httpGet:
               path: /health
-              port: 3043
+              port: 3042
             initialDelaySeconds: 10
             periodSeconds: 5
             failureThreshold: 15
           readinessProbe:
             httpGet:
               path: /health
-              port: 3043
+              port: 3042
             initialDelaySeconds: 10
             periodSeconds: 5
             failureThreshold: 15
-      hostNetwork: true # This is equivalent to `network_mode: host` in Docker Compose

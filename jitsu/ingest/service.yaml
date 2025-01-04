@@ -8,6 +8,6 @@ spec:
   ports:
     - protocol: TCP
       port: 3049
-      targetPort: 8080
-      nodePort: 30080
+      targetPort: 3049
+      nodePort: 30490
   type: NodePort

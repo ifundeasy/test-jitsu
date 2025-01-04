@@ -9,4 +9,4 @@ spec:
     - protocol: TCP
       port: 3401
       targetPort: 3401
-  type: ClusterIP
+  type: NodePort

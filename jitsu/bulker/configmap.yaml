@@ -4,8 +4,7 @@ metadata:
   name: bulker-config
 data:
   # BULKER_KAFKA_BOOTSTRAP_SERVERS: "host.docker.internal:9094"
-  BULKER_KAFKA_BOOTSTRAP_SERVERS: "kafka-service:9092"
-  # BULKER_KAFKA_BOOTSTRAP_SERVERS: "kafka.default.svc.cluster.local:9092"
+  BULKER_KAFKA_BOOTSTRAP_SERVERS: "kafka:9092"
   BULKER_RAW_AUTH_TOKENS: "myBulkerTokenIs123"
   BULKER_CONFIG_SOURCE: "http://console:3000/api/admin/export/bulker-connections"
   BULKER_CONFIG_SOURCE_HTTP_AUTH_TOKEN: "service-admin-account:myConsoleTokenIs123"

@@ -9,4 +9,5 @@ spec:
     - protocol: TCP
       port: 3042
       targetPort: 3042
-  type: ClusterIP
+      nodePort: 30420
+  type: NodePort

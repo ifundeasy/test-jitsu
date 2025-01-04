@@ -1,35 +1,38 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: ingest
+  name: syncctl
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: ingest
+      app: syncctl
   template:
     metadata:
       labels:
-        app: ingest
+        app: syncctl
     spec:
       containers:
-        - name: ingest
-          image: jitsucom/ingest:2.8.5
+        - name: syncctl
+          image: jitsucom/syncctl:2.8.5
           tty: true
           envFrom:
             - configMapRef:
-                name: ingest-config
+                name: syncctl-config
+          ports:
+            - containerPort: 3043
           livenessProbe:
             httpGet:
               path: /health
-              port: 3049
+              port: 3043
             initialDelaySeconds: 10
             periodSeconds: 5
             failureThreshold: 15
           readinessProbe:
             httpGet:
               path: /health
-              port: 3049
+              port: 3043
             initialDelaySeconds: 10
             periodSeconds: 5
             failureThreshold: 15
+      hostNetwork: true # This is equivalent to `network_mode: host` in Docker Compose

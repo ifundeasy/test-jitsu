@@ -4,7 +4,7 @@ metadata:
   name: ingest-config
 data:
   TERM: "xterm-256color"
-  INGEST_PUBLIC_URL: "http://localhost:8080"
+  INGEST_PUBLIC_URL: "http://localhost:30490"
   # INGEST_KAFKA_BOOTSTRAP_SERVERS: "host.docker.internal:9094"
   INGEST_KAFKA_BOOTSTRAP_SERVERS: "kafka:9092"
   INGEST_RAW_AUTH_TOKENS: "myBulkerTokenIs123"
