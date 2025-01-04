@@ -1,0 +1,20 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: ingest-config
+data:
+  TERM: "xterm-256color"
+  INGEST_PUBLIC_URL: "http://localhost:8080"
+  # INGEST_KAFKA_BOOTSTRAP_SERVERS: "host.docker.internal:9094"
+  INGEST_KAFKA_BOOTSTRAP_SERVERS: "kafka:9092"
+  INGEST_RAW_AUTH_TOKENS: "myBulkerTokenIs123"
+  INGEST_REPOSITORY_URL: "http://console:3000/api/admin/export/streams-with-destinations"
+  INGEST_SCRIPT_ORIGIN: "http://console:3000/api/s/javascript-library"
+  INGEST_REPOSITORY_AUTH_TOKEN: "service-admin-account:myConsoleTokenIs123"
+  INGEST_CACHE_DIR: "/tmp/cache"
+  INGEST_ROTOR_URL: "http://rotor:3401"
+  INGEST_ROTOR_AUTH_KEY: "myBulkerTokenIs123"
+  INGEST_CLICKHOUSE_HOST: "host.docker.internal:9000"
+  INGEST_CLICKHOUSE_USERNAME: "default"
+  INGEST_CLICKHOUSE_PASSWORD: "mypswd123"
+  INGEST_CLICKHOUSE_DATABASE: "newjitsu_metrics"

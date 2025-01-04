@@ -1,4 +1,4 @@
-name: "jitsu-service"
+name: "jitsu"
 services:
   console:
     tty: true
@@ -18,7 +18,7 @@ services:
       ENABLE_CREDENTIALS_LOGIN: "true"
       GITHUB_CLIENT_ID: ""
       GITHUB_CLIENT_SECRET: ""
-      SYNCS_ENABLED: "false"
+      SYNCS_ENABLED: "true"
       SYNCCTL_URL: "http://syncctl:3043"
       SYNCCTL_AUTH_KEY: "mySyncctlTokenIs123"
       GOOGLE_SCHEDULER_KEY: ""
@@ -170,13 +170,12 @@ services:
     environment:
       TERM: "xterm-256color"
       HTTP_PORT: "3043"
-      SYNCCTL_SYNCS_ENABLED: "false"
+      SYNCCTL_SYNCS_ENABLED: "true"
       SYNCCTL_RAW_AUTH_TOKENS: "mySyncctlTokenIs123"
       SYNCCTL_DATABASE_URL: "postgresql://postgres:mypswd123@127.0.0.1:5432/postgres?search_path=newjitsu"
       SYNCCTL_SIDECAR_DATABASE_URL: "postgresql://postgres:mypswd123@host.minikube.internal:5432/postgres?search_path=newjitsu"
-      # SYNCCTL_KUBERNETES_CLIENT_CONFIG: ""
-      SYNCCTL_KUBERNETES_CLIENT_CONFIG: "local"
-      SYNCCTL_KUBERNETES_CONTEXT: ""
+      SYNCCTL_KUBERNETES_CLIENT_CONFIG: "${SYNCCTL_KUBERNETES_CLIENT_CONFIG:-local}"
+      SYNCCTL_KUBERNETES_CONTEXT: "${SYNCCTL_KUBERNETES_CONTEXT}"
     network_mode: "host"
     depends_on:
       bulker:

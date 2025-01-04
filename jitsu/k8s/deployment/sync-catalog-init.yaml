@@ -1,0 +1,26 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: sync-catalog-init
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: sync-catalog-init
+  template:
+    metadata:
+      labels:
+        app: sync-catalog-init
+    spec:
+      containers:
+        - name: sync-catalog-init
+          image: curlimages/curl
+          tty: true
+          envFrom:
+            - configMapRef:
+                name: sync-catalog-init-config
+          command: [
+            "/bin/sh",
+            "-c",
+            "curl --silent --output /dev/null --show-error -H 'Authorization: Bearer service-admin-account:${CONSOLE_TOKEN}' 'http://console:3000/api/admin/catalog-refresh?initial=true'",
+          ]

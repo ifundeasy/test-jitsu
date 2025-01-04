@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: rotor
+spec:
+  selector:
+    app: rotor
+  ports:
+    - protocol: TCP
+      port: 3401
+      targetPort: 3401
+  type: ClusterIP

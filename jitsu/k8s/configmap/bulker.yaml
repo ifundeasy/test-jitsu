@@ -1,0 +1,35 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: bulker-config
+data:
+  # BULKER_KAFKA_BOOTSTRAP_SERVERS: "host.docker.internal:9094"
+  BULKER_KAFKA_BOOTSTRAP_SERVERS: "kafka-service:9092"
+  # BULKER_KAFKA_BOOTSTRAP_SERVERS: "kafka.default.svc.cluster.local:9092"
+  BULKER_RAW_AUTH_TOKENS: "myBulkerTokenIs123"
+  BULKER_CONFIG_SOURCE: "http://console:3000/api/admin/export/bulker-connections"
+  BULKER_CONFIG_SOURCE_HTTP_AUTH_TOKEN: "service-admin-account:myConsoleTokenIs123"
+  BULKER_CACHE_DIR: "/tmp/cache"
+  BULKER_INTERNAL_TASK_LOG: >-
+    {
+      "id": "task_log",
+      "metricsKeyPrefix": "syncs",
+      "usesBulker": true,
+      "type": "postgres",
+      "options": {
+        "mode": "stream"
+      },
+      "credentials": {
+        "host": "host.docker.internal",
+        "port": 5432,
+        "sslMode": "disable",
+        "database": "postgres",
+        "password": "mypswd123",
+        "username": "postgres",
+        "defaultSchema": "newjitsu"
+      }
+    }
+  BULKER_CLICKHOUSE_HOST: "host.docker.internal:9000"
+  BULKER_CLICKHOUSE_USERNAME: "default"
+  BULKER_CLICKHOUSE_PASSWORD: "mypswd123"
+  BULKER_CLICKHOUSE_DATABASE: "newjitsu_metrics"

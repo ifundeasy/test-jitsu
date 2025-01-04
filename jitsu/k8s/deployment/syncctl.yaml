@@ -1,0 +1,36 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: syncctl
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: syncctl
+  template:
+    metadata:
+      labels:
+        app: syncctl
+    spec:
+      containers:
+        - name: syncctl
+          image: jitsucom/syncctl:2.8.5
+          tty: true
+          envFrom:
+            - configMapRef:
+                name: syncctl-config
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 3043
+            initialDelaySeconds: 10
+            periodSeconds: 5
+            failureThreshold: 15
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 3043
+            initialDelaySeconds: 10
+            periodSeconds: 5
+            failureThreshold: 15
+      hostNetwork: true # This is equivalent to `network_mode: host` in Docker Compose

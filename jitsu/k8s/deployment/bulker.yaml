@@ -1,0 +1,36 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: bulker
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: bulker
+  template:
+    metadata:
+      labels:
+        app: bulker
+    spec:
+      dnsPolicy: ClusterFirst
+      containers:
+        - name: bulker
+          image: jitsucom/bulker:2.8.5
+          tty: true
+          envFrom:
+            - configMapRef:
+                name: bulker-config
+          # livenessProbe:
+          #   httpGet:
+          #     path: /health
+          #     port: 3042
+          #   initialDelaySeconds: 10
+          #   periodSeconds: 5
+          #   failureThreshold: 15
+          # readinessProbe:
+          #   httpGet:
+          #     path: /health
+          #     port: 3042
+          #   initialDelaySeconds: 10
+          #   periodSeconds: 5
+          #   failureThreshold: 15

@@ -1,0 +1,18 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: rotor-config
+data:
+  ROTOR_RAW_AUTH_TOKENS: "myBulkerTokenIs123"
+  BULKER_URL: "http://bulker:3042"
+  BULKER_AUTH_KEY: "myBulkerTokenIs123"
+  # KAFKA_BOOTSTRAP_SERVERS: "host.docker.internal:9094"
+  KAFKA_BOOTSTRAP_SERVERS: "kafka:9092"
+  REPOSITORY_BASE_URL: "http://console:3000/api/admin/export/"
+  REPOSITORY_AUTH_TOKEN: "service-admin-account:myConsoleTokenIs123"
+  REPOSITORY_CACHE_DIR: "/tmp/cache"
+  MONGODB_URL: "mongodb://default:mypswd123@host.docker.internal/jitsu"
+  CLICKHOUSE_HOST: "host.docker.internal:8123"
+  CLICKHOUSE_USERNAME: "default"
+  CLICKHOUSE_PASSWORD: "mypswd123"
+  CLICKHOUSE_DATABASE: "newjitsu_metrics"

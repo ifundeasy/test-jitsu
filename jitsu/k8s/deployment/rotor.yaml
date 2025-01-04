@@ -1,0 +1,35 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: rotor
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: rotor
+  template:
+    metadata:
+      labels:
+        app: rotor
+    spec:
+      containers:
+        - name: rotor
+          image: jitsucom/rotor:2.8.5
+          tty: true
+          envFrom:
+            - configMapRef:
+                name: rotor-config
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 3401
+            initialDelaySeconds: 10
+            periodSeconds: 5
+            failureThreshold: 15
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 3401
+            initialDelaySeconds: 10
+            periodSeconds: 5
+            failureThreshold: 15
