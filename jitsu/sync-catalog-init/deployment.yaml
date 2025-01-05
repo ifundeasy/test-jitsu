@@ -19,6 +19,13 @@ spec:
           envFrom:
             - configMapRef:
                 name: sync-catalog-init-config
+          resources:
+            requests:
+              cpu: "128m"
+              memory: "64Mi"
+            limits:
+              cpu: "128m"
+              memory: "64Mi"
           command: [
             "/bin/sh",
             "-c",

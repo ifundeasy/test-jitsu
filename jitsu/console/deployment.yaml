@@ -19,6 +19,13 @@ spec:
           envFrom:
             - configMapRef:
                 name: console-config
+          resources:
+            requests:
+              cpu: "512m"
+              memory: "512Mi"
+            limits:
+              cpu: "1"
+              memory: "1Gi"
           ports:
             - containerPort: 3000
           livenessProbe:

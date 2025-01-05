@@ -19,6 +19,13 @@ spec:
           envFrom:
             - configMapRef:
                 name: ingest-config
+          resources:
+            requests:
+              cpu: "128m"
+              memory: "64Mi"
+            limits:
+              cpu: "256m"
+              memory: "128Mi"
           ports:
             - containerPort: 3049
           livenessProbe:

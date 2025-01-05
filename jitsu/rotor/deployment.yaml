@@ -16,6 +16,13 @@ spec:
         - name: rotor
           image: jitsucom/rotor:2.8.5
           tty: true
+          resources:
+            requests:
+              cpu: "512m"
+              memory: "256Mi"
+            limits:
+              cpu: "1"
+              memory: "512Mi"
           envFrom:
             - configMapRef:
                 name: rotor-config

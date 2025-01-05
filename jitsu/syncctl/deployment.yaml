@@ -19,6 +19,13 @@ spec:
           envFrom:
             - configMapRef:
                 name: syncctl-config
+          resources:
+            requests:
+              cpu: "128m"
+              memory: "64Mi"
+            limits:
+              cpu: "256m"
+              memory: "128Mi"
           ports:
             - containerPort: 3043
           livenessProbe:
